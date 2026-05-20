@@ -46,6 +46,10 @@ Analyze the identified XML View's structure, hierarchy, and implementation
 details.
 Use [references/analysis-of-the-project-and-layout.md](references/analysis-of-the-project-and-layout.md) to
 guide your technical audit of the layout and surrounding project context.
+**Constraint:** Explicitly extract and record the root view's `layout_width` and
+`layout_height` as named constraints in the analysis output. These values are the
+sole source of truth for the root `Modifier` written in Step 7 — do not infer or
+assume them.
 
 ### Step 3: Create a plan
 
@@ -91,6 +95,15 @@ Convert the XML candidate to Jetpack Compose code, referencing
 [references/xml-layout-migration.md](references/xml-layout-migration.md) and the image from Step 4.
 You must include a **Compose Preview** for the newly created composable to
 facilitate visual verification.
+**Constraint:** Before writing the root composable, derive its size `Modifier`
+directly from the root view constraints recorded in Step 2. Never default to
+`fillMaxSize()` — always derive it from the XML root:
+
+| XML root `layout_width` / `layout_height`       | Compose `Modifier`                              |
+|-------------------------------------------------|-------------------------------------------------|
+| `match_parent` / `match_parent`                 | `Modifier.fillMaxSize()`                        |
+| `match_parent` / `wrap_content`                 | `Modifier.fillMaxWidth().wrapContentHeight()`   |
+| `wrap_content` / `wrap_content`                 | *(no size constraint)*                          |
 
 ### Step 8: Replace usages
 
